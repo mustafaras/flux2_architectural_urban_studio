@@ -110,22 +110,22 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    SUBGRAPH_UI[User-Facing Layer]
+    subgraph SUBGRAPH_UI[User-Facing Layer]
         SB[Sidebar]
         PG[Pages]
     end
-    SUBGRAPH_APP[Application Layer]
+    subgraph SUBGRAPH_APP[Application Layer]
         ST[State Manager]
         QA[Quick Actions]
         EH[Error Handler]
     end
-    SUBGRAPH_DOMAIN[Domain Services]
+    subgraph SUBGRAPH_DOMAIN[Domain Services]
         Q[Queue Manager]
         S[Safety Pipeline]
         A[Analytics + KPI]
         G[Governance Artifacts]
     end
-    SUBGRAPH_INFRA[Infra & IO]
+    subgraph SUBGRAPH_INFRA[Infra and IO]
         M[Model Files / HF]
         O[Outputs]
         OBS[Monitoring Stack]
@@ -494,7 +494,7 @@ Native deployment is supported with service and observability assets in this rep
 
 ```mermaid
 flowchart LR
-    APP[Streamlit Worker(s)] --> PROXY[Nginx / Reverse Proxy]
+    APP[Streamlit Workers] --> PROXY[Nginx Reverse Proxy]
     APP --> QUEUE[Generation Queue]
     APP --> LOGS[Logs + Error Reports]
     LOGS --> OBS[Prometheus + Grafana]
