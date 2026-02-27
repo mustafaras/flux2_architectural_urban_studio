@@ -10,6 +10,7 @@
 ![Ops](https://img.shields.io/badge/Ops-Queue%20%7C%20Monitoring%20%7C%20Recovery-0A66C2)
 
 ---
+<img width="768" height="768" alt="flux2_flux-2-klein-4b_20260227_141328_seed1_s4_g1 0" src="https://github.com/user-attachments/assets/fac4c9e5-d6bb-4d3d-94fa-45d488983618" />
 
 ## Table of Contents
 
@@ -241,6 +242,7 @@ State design is contract-driven. Key families include:
 - Session clear must preserve durable project context.
 
 ---
+<img width="768" height="768" alt="flux2_flux-2-klein-base-4b_20260227_140332_seed1_s13_g4 0" src="https://github.com/user-attachments/assets/39f6d997-5918-4af8-acc3-562fe7d31138" />
 
 ## Experimental and Benchmark Philosophy
 
@@ -466,6 +468,7 @@ Download from Hugging Face and place files into the exact folders above:
 For gated/private model access, export `HF_TOKEN` before download.
 
 ---
+<img width="768" height="768" alt="flux2_flux-2-klein-base-4b_20260227_133032_seed1_s50_g4 0" src="https://github.com/user-attachments/assets/92a3deb4-8b79-41c4-97ba-51b42dbf0467" />
 
 ## Security, Privacy, and Safe Publishing
 
