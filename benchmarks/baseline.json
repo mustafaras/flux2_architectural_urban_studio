@@ -1,0 +1,21 @@
+{
+  "generation_duration_ms": 3200,
+  "model_load_duration_ms": 4500,
+  "prompt_encoding_ms": 150,
+  "safety_check_ms": 50,
+  "denoising_duration_ms": 2800,
+  "decoding_duration_ms": 120,
+  "postprocessing_ms": 80,
+  "memory_peak_mb": 6500,
+  "vram_reserved_mb": 8000,
+  "throughput_images_per_second": 0.31,
+  "cache_hit_rate": 0.75,
+  "_metadata": {
+    "timestamp": "2026-02-23T12:00:00Z",
+    "model": "flux-2-klein-4b",
+    "device": "NVIDIA RTX 4070",
+    "dtype": "bf16",
+    "num_samples": 100,
+    "environment": "Production"
+  }
+}

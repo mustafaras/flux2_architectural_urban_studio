@@ -1,0 +1,157 @@
+{
+  "rabbitmq_version": "3.12.0",
+  "definitions_version": 6,
+  "users": [
+    {
+      "name": "guest",
+      "password_hash": "g6qKPBKav20o8Z4+XSMx20FY7vkKLa7/G8/AyWATuR0QDtQT",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
+    {
+      "name": "flux2_app",
+      "password_hash": "6lsqsvA8Q9zsmB1Neb7F7pQe/QDhb+6eYzhfNwPdZvtNs2Yx",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "flux2"
+    },
+    {
+      "name": "flux2_monitor",
+      "password_hash": "sXrN7+PHwbvYDxJyLSQgA3ZIGr6lVb1fCEMKQ2xXGHQd9a8P",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "monitoring"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    },
+    {
+      "name": "flux2"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "flux2_app",
+      "vhost": "flux2",
+      "configure": "^flux2\\..*",
+      "write": "^flux2\\..*",
+      "read": "^flux2\\..*"
+    },
+    {
+      "user": "flux2_monitor",
+      "vhost": "flux2",
+      "configure": "",
+      "write": "",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "exchanges": [
+    {
+      "name": "flux2.tasks",
+      "vhost": "flux2",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "flux2.events",
+      "vhost": "flux2",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "flux2.results",
+      "vhost": "flux2",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "flux2.generation.requests",
+      "vhost": "flux2",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 600000,
+        "x-max-length": 10000,
+        "x-dead-letter-exchange": "flux2.dlx"
+      }
+    },
+    {
+      "name": "flux2.generation.results",
+      "vhost": "flux2",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 3600000,
+        "x-max-length": 5000
+      }
+    },
+    {
+      "name": "flux2.model.requests",
+      "vhost": "flux2",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 300000,
+        "x-max-length": 1000
+      }
+    },
+    {
+      "name": "flux2.cache.invalidate",
+      "vhost": "flux2",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "flux2.dlx.generation",
+      "vhost": "flux2",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "flux2.tasks",
+      "destination": "flux2.generation.requests",
+      "destination_type": "queue",
+      "routing_key": "generation.*",
+      "arguments": {}
+    },
+    {
+      "source": "flux2.tasks",
+      "destination": "flux2.model.requests",
+      "destination_type": "queue",
+      "routing_key": "model.*",
+      "arguments": {}
+    },
+    {
+      "source": "flux2.events",
+      "destination": "flux2.cache.invalidate",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

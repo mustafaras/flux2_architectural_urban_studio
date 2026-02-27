@@ -1,0 +1,131 @@
+[project]
+name = "flux"
+version = "0.1.0"
+description = "Inference codebase for FLUX.2"
+readme = "docs/README.md"
+requires-python = ">=3.10,<3.13"
+authors = [
+  { name = "Black Forest Labs", email = "support@blackforestlabs.ai" }
+]
+license = { file = "docs/LICENSE.md" }
+
+dependencies = [
+  "torch==2.8.0",
+  "torchvision==0.23.0",
+  "einops==0.8.1",
+  "transformers==4.56.1",
+  "safetensors==0.4.5",
+  "fire==0.7.1",
+  "openai==2.8.1",
+  "accelerate==1.12.0",
+  "prometheus-client==0.21.0",
+  "plotly==5.24.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.6.8",
+  "black==24.1.1",
+  "mypy==1.8.0",
+  "isort==5.13.2",
+  "pylint==3.0.3",
+  "pytest==7.4.4",
+  "pytest-cov==4.1.0",
+  "pytest-timeout==2.2.0",
+  "pytest-mock==3.12.0",
+  "pytest-xdist==3.5.0",
+  "pytest-benchmark==4.0.0",
+  "coverage==7.4.1",
+  "radon==6.0.1",
+  "bandit==1.7.5",
+  "safety==2.3.5",
+  "memory-profiler==0.61.0",
+  "line-profiler==4.1.1",
+]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = [
+  "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.black]
+line-length = 110
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | venv
+)/
+'''
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+line_length = 110
+skip_glob = ["*/migrations/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+markers = [
+  "unit: Unit tests",
+  "integration: Integration tests",
+  "slow: Slow tests",
+  "gpu: GPU tests",
+  "network: Network-dependent tests",
+]
+
+[tool.coverage.run]
+source = ["src/flux2", "ui"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "if sys.version_info",
+]
+precision = 2

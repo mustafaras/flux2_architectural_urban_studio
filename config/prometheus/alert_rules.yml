@@ -1,0 +1,235 @@
+# FLUX.2 Prometheus Alert Rules
+# Location: /opt/flux2/config/prometheus/alert_rules.yml
+
+groups:
+  - name: flux2_alerts
+    interval: 30s
+    rules:
+      # ======================================================
+      # WORKER AVAILABILITY ALERTS
+      # ======================================================
+      
+      - alert: UIWorkerDown
+        expr: up{job="flux2-ui-workers"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: ui-worker
+        annotations:
+          summary: "UI Worker Down"
+          description: "UI worker {{ $labels.instance }} is down for more than 1 minute"
+          runbook_url: "https://wiki.internal/flux2/troubleshooting#ui-worker-down"
+
+      - alert: ModelWorkerDown
+        expr: up{job="flux2-model-workers"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: model-worker
+        annotations:
+          summary: "Model Worker Down"
+          description: "Model worker {{ $labels.instance }} is down for more than 2 minutes"
+
+      # ======================================================
+      # GPU MEMORY ALERTS
+      # ======================================================
+      
+      - alert: GPUMemoryExhausted
+        expr: nvidia_smi_memory_used_mb / nvidia_smi_memory_total_mb > 0.9
+        for: 2m
+        labels:
+          severity: warning
+          resource: gpu
+        annotations:
+          summary: "GPU Memory Nearly Full"
+          description: "GPU {{ $labels.gpu }} memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: GPUMemoryCritical
+        expr: nvidia_smi_memory_used_mb / nvidia_smi_memory_total_mb > 0.98
+        for: 1m
+        labels:
+          severity: critical
+          resource: gpu
+        annotations:
+          summary: "GPU Memory Critical"
+          description: "GPU {{ $labels.gpu }} memory CRITICAL on {{ $labels.instance }}"
+
+      # ======================================================
+      # GPU TEMPERATURE ALERTS
+      # ======================================================
+      
+      - alert: GPUTemperatureHigh
+        expr: nvidia_smi_temperature_gpu > 80
+        for: 3m
+        labels:
+          severity: warning
+          resource: gpu
+        annotations:
+          summary: "GPU Temperature High"
+          description: "GPU {{ $labels.gpu }} temperature is {{ $value }}°C on {{ $labels.instance }}"
+
+      - alert: GPUTemperatureCritical
+        expr: nvidia_smi_temperature_gpu > 90
+        for: 1m
+        labels:
+          severity: critical
+          resource: gpu
+        annotations:
+          summary: "GPU Temperature Critical"
+          description: "GPU {{ $labels.gpu }} temperature CRITICAL {{ $value }}°C on {{ $labels.instance }}"
+
+      # ======================================================
+      # QUEUE ALERTS
+      # ======================================================
+      
+      - alert: GenerationQueueBacklog
+        expr: flux2_queue_length > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: queue
+        annotations:
+          summary: "Generation Queue Backlog"
+          description: "Generation queue has {{ $value }} items queued (threshold: 50)"
+
+      - alert: GenerationQueueCritical
+        expr: flux2_queue_length > 100
+        for: 2m
+        labels:
+          severity: critical
+          component: queue
+        annotations:
+          summary: "Generation Queue Critical"
+          description: "Generation queue CRITICAL with {{ $value }} items (max: 100)"
+
+      # ======================================================
+      # GENERATION LATENCY ALERTS
+      # ======================================================
+      
+      - alert: GenerationLatencyHigh
+        expr: histogram_quantile(0.95, rate(flux2_generation_duration_seconds_bucket[5m])) > 40
+        for: 10m
+        labels:
+          severity: warning
+          metric: latency
+        annotations:
+          summary: "Generation Latency High"
+          description: "P95 generation latency is {{ $value }}s (SLA: <30s)"
+
+      - alert: GenerationLatencyCritical
+        expr: histogram_quantile(0.95, rate(flux2_generation_duration_seconds_bucket[5m])) > 60
+        for: 5m
+        labels:
+          severity: critical
+          metric: latency
+        annotations:
+          summary: "Generation Latency Critical"
+          description: "P95 generation latency is {{ $value }}s (SLA: <30s)"
+
+      # ======================================================
+      # ERROR RATE ALERTS
+      # ======================================================
+      
+      - alert: ErrorRateHigh
+        expr: rate(flux2_api_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "API Error Rate High"
+          description: "Error rate is {{ $value | humanizePercentage }} in last 5m (threshold: 5%)"
+
+      - alert: ErrorRateCritical
+        expr: rate(flux2_api_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API Error Rate Critical"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # ======================================================
+      # CACHE HIT RATE ALERTS
+      # ======================================================
+      
+      - alert: CacheHitRateLow
+        expr: |
+          rate(flux2_model_cache_hits_total[1h]) / 
+          (rate(flux2_model_cache_hits_total[1h]) + rate(flux2_model_cache_misses_total[1h])) < 0.5
+        for: 30m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Model Cache Hit Rate Low"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (expected: >50%)"
+
+      # ======================================================
+      # SERVICE CONNECTIVITY ALERTS
+      # ======================================================
+      
+      - alert: NginxDown
+        expr: up{job="flux2-nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: nginx
+        annotations:
+          summary: "Nginx Load Balancer Down"
+          description: "Nginx is unreachable for more than 1 minute"
+
+      - alert: RedisDown
+        expr: up{job="flux2-redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis Cache Down"
+          description: "Redis is unreachable for more than 1 minute"
+
+      - alert: RabbitMQDown
+        expr: up{job="flux2-rabbitmq"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: rabbitmq
+        annotations:
+          summary: "RabbitMQ Queue Down"
+          description: "RabbitMQ is unreachable for more than 1 minute"
+
+      # ======================================================
+      # HOST RESOURCE ALERTS
+      # ======================================================
+      
+      - alert: CPUUsageHigh
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          resource: cpu
+        annotations:
+          summary: "CPU Usage High"
+          description: "CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: MemoryUsageHigh
+        expr: 100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          resource: memory
+        annotations:
+          summary: "Memory Usage High"
+          description: "Memory usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      - alert: DiskUsageHigh
+        expr: 100 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          resource: disk
+        annotations:
+          summary: "Disk Usage High"
+          description: "Disk usage is {{ $value | humanize }}% on {{ $labels.instance }}"

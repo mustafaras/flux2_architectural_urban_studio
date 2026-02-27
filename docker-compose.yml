@@ -1,0 +1,295 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # FLUX.2 UI WORKERS (Streamlit)
+  # ============================================================
+  
+  flux2-ui-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flux2:latest
+    container_name: flux2-ui-worker-1
+    ports:
+      - "8501:8501"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: "0"
+      FLASK_ENV: production
+    volumes:
+      - ./weights:/opt/flux2/weights:ro
+      - ./outputs:/opt/flux2/outputs
+      - ./config:/opt/flux2/config:ro
+    command: streamlit run ui_flux2_professional.py --server.port=8501 --server.address=0.0.0.0
+    depends_on:
+      - redis
+      - rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  flux2-ui-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flux2:latest
+    container_name: flux2-ui-worker-2
+    ports:
+      - "8502:8502"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: "0"
+      FLASK_ENV: production
+    volumes:
+      - ./weights:/opt/flux2/weights:ro
+      - ./outputs:/opt/flux2/outputs
+      - ./config:/opt/flux2/config:ro
+    command: streamlit run ui_flux2_professional.py --server.port=8502 --server.address=0.0.0.0
+    depends_on:
+      - redis
+      - rabbitmq
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  flux2-ui-worker-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flux2:latest
+    container_name: flux2-ui-worker-3
+    ports:
+      - "8503:8503"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: "0"
+      FLASK_ENV: production
+    volumes:
+      - ./weights:/opt/flux2/weights:ro
+      - ./outputs:/opt/flux2/outputs
+      - ./config:/opt/flux2/config:ro
+    command: streamlit run ui_flux2_professional.py --server.port=8503 --server.address=0.0.0.0
+    depends_on:
+      - redis
+      - rabbitmq
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  # ============================================================
+  # MODEL WORKERS (Inference)
+  # ============================================================
+  
+  flux2-model-worker-4b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flux2:latest
+    container_name: flux2-model-worker-4b
+    ports:
+      - "8600:8600"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: "1"
+      MODEL_WORKER_HOST: "0.0.0.0"
+      MODEL_WORKER_PORT: "8600"
+      MODEL_SERVICE_NAME: "klein-4b-service"
+      MODEL_KEY: "flux.2-klein-4b"
+    volumes:
+      - ./weights:/opt/flux2/weights:ro
+      - ./config:/opt/flux2/config:ro
+    command: python scripts/model_worker.py
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8600/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - flux2-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  flux2-model-worker-9b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flux2:latest
+    container_name: flux2-model-worker-9b
+    ports:
+      - "8601:8601"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: "2"
+      MODEL_WORKER_HOST: "0.0.0.0"
+      MODEL_WORKER_PORT: "8601"
+      MODEL_SERVICE_NAME: "klein-9b-service"
+      MODEL_KEY: "flux.2-klein-9b"
+    volumes:
+      - ./weights:/opt/flux2/weights:ro
+      - ./config:/opt/flux2/config:ro
+    command: python scripts/model_worker.py
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8601/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - flux2-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ============================================================
+  # INFRASTRUCTURE SERVICES
+  # ============================================================
+  
+  redis:
+    image: redis:7-alpine
+    container_name: flux2-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: flux2-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - ./config/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./config/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  # ============================================================
+  # MONITORING STACK
+  # ============================================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: flux2-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: flux2-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./config/grafana/flux2-dashboard.json:/etc/grafana/provisioning/dashboards/flux2-dashboard.json:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+  # ============================================================
+  # REVERSE PROXY & LOAD BALANCER
+  # ============================================================
+  
+  nginx:
+    image: nginx:alpine
+    container_name: flux2-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/flux2.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flux2-ui-worker-1
+      - flux2-ui-worker-2
+      - flux2-ui-worker-3
+      - flux2-model-worker-4b
+      - flux2-model-worker-9b
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flux2-net
+    restart: unless-stopped
+
+networks:
+  flux2-net:
+    driver: bridge
+
+volumes:
+  redis-data:
+  rabbitmq-data:
+  prometheus-data:
+  grafana-data:

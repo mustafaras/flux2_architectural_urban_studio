@@ -1,0 +1,32 @@
+[run]
+source = src/flux2,ui
+branch = True
+parallel = True
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+skip_empty = True
+
+# Exclude certain files from coverage
+omit =
+    */tests/*
+    */site-packages/*
+    */__pycache__/*
+    */venv/*
+    */virtualenv/*
+
+[html]
+directory = reports/coverage
+
+[lcov]
+output = reports/coverage.lcov
+
+[paths]
+source =
+    src/flux2/
+    ui/
+
+[tool:coverage]
+parallel = True

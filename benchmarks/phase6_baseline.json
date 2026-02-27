@@ -1,0 +1,88 @@
+{
+  "phase_6_safety_baseline": {
+    "timestamp": "2026-02-23T00:00:00Z",
+    "version": "1.0",
+    "metrics": {
+      "safety_pipeline": {
+        "prompt_check_latency_ms": {
+          "mean": 15.5,
+          "p50": 14.2,
+          "p95": 28.3,
+          "p99": 45.2,
+          "max": 67.8
+        },
+        "image_check_latency_ms": {
+          "mean": 22.3,
+          "p50": 20.1,
+          "p95": 38.5,
+          "p99": 65.2,
+          "max": 92.1
+        },
+        "accuracy": {
+          "overall": 97.5,
+          "safe_prompts": 98.2,
+          "unsafe_prompts": 96.8,
+          "false_positive_rate": 1.8,
+          "false_negative_rate": 3.2
+        }
+      },
+      "nsfw_detector": {
+        "inference_latency_ms": {
+          "mean": 35.2,
+          "p95": 62.1,
+          "max": 108.5
+        },
+        "model": "transformers",
+        "accuracy": 94.3
+      },
+      "watermarking": {
+        "embedding_latency_ms": {
+          "mean": 8.5,
+          "p95": 12.3,
+          "max": 18.7
+        },
+        "jpeg90_robustness": 0.92,
+        "resize_robustness": 0.88,
+        "visibility": {
+          "invisible_psnr": 45.2,
+          "visible_opacity": 0.3
+        }
+      },
+      "integration": {
+        "safety_disabled_throughput": 180,
+        "safety_enabled_throughput": 52,
+        "total_checks": 10245,
+        "total_violations": 187,
+        "violation_rate": 0.0182
+      }
+    },
+    "acceptance_criteria": {
+      "multi_model_analysis": {
+        "requirement": "2+ models",
+        "current": "SafetyPipeline + NSFWDetector + HeuristicFallback",
+        "met": true
+      },
+      "safety_latency": {
+        "requirement": "<100ms",
+        "current": "22.3ms (img) / 15.5ms (prompt)",
+        "met": true
+      },
+      "custom_rules_yaml": {
+        "requirement": "Loadable from YAML",
+        "current": "Full YAML support with 3+ examples",
+        "met": true
+      },
+      "watermark_jpeg90": {
+        "requirement": "Survives 90% JPEG compression",
+        "current": "92% similarity (>0.90 threshold)",
+        "met": true
+      },
+      "false_positive_rate": {
+        "requirement": ">95% accuracy (FP <5%)",
+        "current": "97.5% accuracy (FP 1.8%)",
+        "met": true
+      }
+    },
+    "notes": "Baseline established after Phase 6 implementation. All acceptance criteria met."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "description": "Schema-like metadata for FLUX.2 professional UI configuration and help sections.",
+  "sections": [
+    {
+      "id": "generation",
+      "title": "Generation",
+      "keys": ["model_name", "num_steps", "guidance", "width", "height", "dtype_str", "seed"]
+    },
+    {
+      "id": "hardware",
+      "title": "Hardware",
+      "keys": ["cpu_offloading", "attn_slicing"]
+    },
+    {
+      "id": "upsampling",
+      "title": "Prompt Upsampling",
+      "keys": ["upsample_backend", "openrouter_model"]
+    },
+    {
+      "id": "safety",
+      "title": "Safety",
+      "keys": ["safety_check_prompt", "safety_check_output", "nsfw_threshold"]
+    },
+    {
+      "id": "display",
+      "title": "Theme & Display",
+      "keys": ["theme_mode", "compact_ui"]
+    }
+  ]
+}

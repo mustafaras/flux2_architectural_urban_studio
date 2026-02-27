@@ -1,0 +1,123 @@
+/* FLUX.2 Professional UI — custom stylesheet */
+
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap");
+
+/* ── Base typography ─────────────────────────────────────────────────────── */
+html, body, [class*="css"]  {
+    font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ── App background ───────────────────────────────────────────────────────── */
+.stApp {
+    background: linear-gradient(180deg, #f9fafb 0%, #ffffff 40%, #f4f6fb 100%);
+}
+
+/* ── Global card-style containers ─────────────────────────────────────────── */
+div[data-testid="stVerticalBlock"] > div[data-testid="stExpander"] {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+div[data-testid="stContainer"] {
+    border-radius: 8px;
+}
+
+/* ── Subtle cards for columns ─────────────────────────────────────────────── */
+div[data-testid="stVerticalBlock"] > div > div[data-testid="stContainer"] {
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+/* ── Section headers ───────────────────────────────────────────────────────── */
+h3 {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    margin-top: 0.75rem !important;
+}
+
+/* ── Primary button polish ─────────────────────────────────────────────────── */
+button[kind="primary"] {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    transition: filter 0.15s ease;
+}
+
+button[kind="primary"]:hover {
+    filter: brightness(1.08);
+}
+
+/* ── Metric widget (for fixed params display) ─────────────────────────────── */
+div[data-testid="stMetric"] > label {
+    font-size: 0.78rem !important;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+div[data-testid="stMetric"] > div {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+}
+
+/* ── Image caption ─────────────────────────────────────────────────────────── */
+div[data-testid="stImage"] > div > small {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.55;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+button[data-baseweb="tab"] {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    font-weight: 700;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    padding-top: 1rem;
+    background: #f7f8fb;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* ── Warning / info banners ────────────────────────────────────────────────── */
+div[data-testid="stAlert"] {
+    border-radius: 6px !important;
+}
+
+/* ── Prompt textarea ───────────────────────────────────────────────────────── */
+textarea {
+    font-size: 0.9rem !important;
+    line-height: 1.55 !important;
+}
+
+/* ── Download button ───────────────────────────────────────────────────────── */
+a[data-testid="stDownloadButton"] button {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────────── */
+div[data-testid="stSpinner"] {
+    opacity: 0.9;
+}
+
+/* ── Success message highlight ─────────────────────────────────────────────── */
+div[data-testid="stAlert"][kind="success"] {
+    border-left: 4px solid #21c55d;
+}
+
+/* ── Error message highlight ───────────────────────────────────────────────── */
+div[data-testid="stAlert"][kind="error"] {
+    border-left: 4px solid #ef4444;
+}

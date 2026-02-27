@@ -1,0 +1,19 @@
+[Unit]
+Description=FLUX.2 Grafana Visualization Service
+After=network.target
+Wants=flux2-prometheus.service
+
+[Service]
+Type=simple
+User=flux2
+Group=flux2
+WorkingDirectory=/opt/flux2
+ExecStart=/opt/flux2/.venv/bin/grafana-server --config=/opt/flux2/config/grafana/grafana.ini --homepath=/opt/flux2/config/grafana
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flux2-grafana
+
+[Install]
+WantedBy=multi-user.target

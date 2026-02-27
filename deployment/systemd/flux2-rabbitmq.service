@@ -1,0 +1,20 @@
+[Unit]
+Description=FLUX.2 RabbitMQ Message Queue Service
+After=network.target
+
+[Service]
+Type=simple
+User=flux2
+Group=flux2
+WorkingDirectory=/opt/flux2
+ExecStart=/opt/flux2/.venv/bin/rabbitmq-server
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flux2-rabbitmq
+Environment="RABBITMQ_CONFIG_FILE=/opt/flux2/config/rabbitmq/rabbitmq.conf"
+Environment="RABBITMQ_MNESIA_DIR=/var/lib/flux2/rabbitmq"
+
+[Install]
+WantedBy=multi-user.target

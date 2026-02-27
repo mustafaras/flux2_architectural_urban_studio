@@ -1,0 +1,168 @@
+# FLUX.2 Prometheus Monitoring Configuration
+# Location: /opt/flux2/config/prometheus/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'flux2-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alert_rules.yml"
+  # - "second_rules.yml"
+
+# ============================================================
+# SCRAPE CONFIGURATIONS
+# ============================================================
+
+scrape_configs:
+  # ========================================================
+  # Prometheus itself
+  # ========================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['127.0.0.1:9090']
+
+  # ========================================================
+  # Model Worker Services (Klein 4B, 9B)
+  # ========================================================
+  - job_name: 'flux2-model-workers'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    metrics_path: '/metrics'
+    
+    static_configs:
+      - targets: ['127.0.0.1:8600']
+        labels:
+          service: 'klein-4b-worker'
+          gpu: '1'
+      - targets: ['127.0.0.1:8601']
+        labels:
+          service: 'klein-9b-worker'
+          gpu: '2'
+    
+    # Retry logic
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ========================================================
+  # UI Worker Services (Streamlit)
+  # ========================================================
+  - job_name: 'flux2-ui-workers'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    
+    static_configs:
+      - targets: ['127.0.0.1:8501']
+        labels:
+          service: 'ui-worker-1'
+      - targets: ['127.0.0.1:8502']
+        labels:
+          service: 'ui-worker-2'
+      - targets: ['127.0.0.1:8503']
+        labels:
+          service: 'ui-worker-3'
+
+  # ========================================================
+  # Nginx Reverse Proxy
+  # ========================================================
+  - job_name: 'flux2-nginx'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: '/metrics'
+    
+    static_configs:
+      - targets: ['127.0.0.1:9113']
+        labels:
+          service: 'nginx-exporter'
+
+  # ========================================================
+  # Redis Cache
+  # ========================================================
+  - job_name: 'flux2-redis'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    
+    static_configs:
+      - targets: ['127.0.0.1:6379']
+        labels:
+          service: 'redis-cache'
+
+  # ========================================================
+  # RabbitMQ Message Queue
+  # ========================================================
+  - job_name: 'flux2-rabbitmq'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: '/api/metrics'
+    
+    basic_auth:
+      username: 'guest'
+      password: 'guest'
+    
+    static_configs:
+      - targets: ['127.0.0.1:15672']
+        labels:
+          service: 'rabbitmq-queue'
+
+  # ========================================================
+  # Host-level Metrics (Node Exporter)
+  # ========================================================
+  - job_name: 'flux2-node'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    
+    static_configs:
+      - targets: ['127.0.0.1:9100']
+        labels:
+          service: 'node-exporter'
+          role: 'gpu-worker'
+
+  # ========================================================
+  # NVIDIA GPU Metrics (GPU Exporter)
+  # ========================================================
+  - job_name: 'flux2-gpu'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    
+    static_configs:
+      - targets: ['127.0.0.1:9445']
+        labels:
+          service: 'nvidia-exporter'
+
+  # ========================================================
+  # Application Metrics (Python/Prometheus Client)
+  # ========================================================
+  - job_name: 'flux2-app'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: '/metrics'
+    
+    static_configs:
+      - targets: ['127.0.0.1:8600', '127.0.0.1:8601']
+        labels:
+          service: 'flux2-workers'
+
+# ============================================================
+# OPTIONAL: Remote Storage Configuration
+# ============================================================
+
+# Store metrics remotely (e.g., Thanos, InfluxDB)
+# remote_write:
+#   - url: "http://remote-storage:9009/api/v1/push"
+#     write_relabel_configs:
+#       - source_labels: [__name__]
+#         regex: '(flux2_.*|process_.*|go_.*)'
+#         action: keep
+
+# remote_read:
+#   - url: "http://remote-storage:9009/api/v1/read"

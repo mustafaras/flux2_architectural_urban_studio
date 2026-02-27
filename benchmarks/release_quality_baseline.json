@@ -1,0 +1,12 @@
+{
+  "prompt_counts": {
+    "architecture": 10,
+    "urban": 10,
+    "total": 20
+  },
+  "quality": {
+    "coherence": 0.7200,
+    "plausibility": 0.7100,
+    "readiness": 0.7000
+  }
+}

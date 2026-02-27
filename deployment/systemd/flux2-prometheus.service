@@ -1,0 +1,18 @@
+[Unit]
+Description=FLUX.2 Prometheus Monitoring Service
+After=network.target
+
+[Service]
+Type=simple
+User=flux2
+Group=flux2
+WorkingDirectory=/opt/flux2
+ExecStart=/opt/flux2/.venv/bin/prometheus --config.file=/opt/flux2/config/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/flux2/prometheus
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flux2-prometheus
+
+[Install]
+WantedBy=multi-user.target

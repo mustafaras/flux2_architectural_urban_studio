@@ -1,0 +1,58 @@
+{
+  "phase": "phase1_caching_performance",
+  "captured_at": "2026-02-20T09:19:30Z",
+  "environment": {
+    "device": "cuda",
+    "model": "flux.2-klein-4b",
+    "dtype": "bf16",
+    "width": 256,
+    "height": 256,
+    "steps": 2,
+    "sequential_runs": 10,
+    "concurrent_runs": 10,
+    "soak_seconds": 120
+  },
+  "targets": {
+    "first_load_seconds_lt": 5.0,
+    "cached_load_seconds_lt": 0.5,
+    "gpu_peak_ratio_lte": 0.8,
+    "cache_hit_rate_gte": 0.7
+  },
+  "benchmarks": {
+    "sequential_same_prompt_10x": {
+      "first_request_seconds": 4.222494900000129,
+      "average_cached_request_seconds": 0.0032013666668717633,
+      "cache_hit_rate": 0.9999431721316133,
+      "deterministic_same_prompt": true
+    },
+    "concurrent_requests_10x": {
+      "p50_seconds": 0.01577460000044084,
+      "p95_seconds": 0.01802049999969313,
+      "max_queue_depth": 10
+    },
+    "continuous_1h": {
+      "memory_leak_detected": false,
+      "peak_gpu_ratio": 0.5790052212146194,
+      "thermal_stability_ok": true,
+      "temperature_max_c": 59.0,
+      "power_max_w": 52.6,
+      "iterations": 35173
+    },
+    "model_load": {
+      "cold_first_load_seconds": 9.366594300000543,
+      "startup_warmup_seconds": 0.0005214000002524699,
+      "first_load_seconds": 0.046032799999920826,
+      "cached_load_seconds": 0.0535014000006413
+    }
+  },
+  "acceptance": {
+    "first_load_lt_5s": true,
+    "cached_load_lt_0_5s": true,
+    "gpu_peak_ratio_lte_0_8": true,
+    "cache_hit_rate_gte_0_7": true,
+    "deterministic_same_prompt": true,
+    "no_memory_leak": true,
+    "thermal_stability_ok": true
+  },
+  "status": "completed"
+}

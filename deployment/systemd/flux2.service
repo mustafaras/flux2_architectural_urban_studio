@@ -1,0 +1,23 @@
+[Unit]
+Description=FLUX.2 Supervisord Process Manager
+After=network.target
+Wants=flux2-redis.service flux2-rabbitmq.service
+
+[Service]
+Type=forking
+User=flux2
+Group=flux2
+WorkingDirectory=/opt/flux2
+ExecStartPre=/bin/mkdir -p /var/log/supervisor
+ExecStart=/opt/flux2/.venv/bin/supervisord -c /opt/flux2/deployment/supervisord/flux2.conf
+ExecStop=/opt/flux2/.venv/bin/supervisorctl -c /opt/flux2/deployment/supervisord/flux2.conf shutdown
+ExecReload=/opt/flux2/.venv/bin/supervisorctl -c /opt/flux2/deployment/supervisord/flux2.conf reread
+ExecReload=/opt/flux2/.venv/bin/supervisorctl -c /opt/flux2/deployment/supervisord/flux2.conf update
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=supervisord
+
+[Install]
+WantedBy=multi-user.target
