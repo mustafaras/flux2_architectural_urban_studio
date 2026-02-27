@@ -55,6 +55,7 @@ The platform is explicitly designed for **iterative architectural reasoning** ra
 - Export-ready visual packages for review and communication
 
 ---
+<img width="2490" height="1271" alt="image" src="https://github.com/user-attachments/assets/08c039cc-9dac-460d-968a-7c0f7b201bd3" />
 
 ## Objectives
 
